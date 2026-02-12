@@ -15,37 +15,49 @@ export default function ZondaScrollCanvas({
     imageFolderPath = '/images/revuelto-sequence/',
 }: ZondaScrollCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [loadedCount, setLoadedCount] = useState(0);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const [imagesLoaded, setImagesLoaded] = useState(false);
 
     // Load all images on mount
     useEffect(() => {
-        let loadedCount = 0;
-        const loadedImages: HTMLImageElement[] = [];
+        const loadImages = async () => {
+            const loadedImages: HTMLImageElement[] = [];
 
-        // Pre-fill array
-        for (let i = 0; i < totalFrames; i++) {
-            const img = new Image();
-            const frameIndex = i + 1;
-            const filename = `frame-${String(frameIndex).padStart(3, '0')}.jpg`;
-            img.src = `${imageFolderPath}${filename}`;
+            // Pre-fill array with empty images relative to totalFrames
+            // We want to keep the order correct, so we'll init the array
+            // and then update it? No, images are objects. 
+            // Better to create all Image objects first, then attach onload.
 
-            img.onload = () => {
-                loadedCount++;
-                if (loadedCount === totalFrames) {
-                    setImagesLoaded(true);
-                }
-            };
+            for (let i = 0; i < totalFrames; i++) {
+                const img = new Image();
+                const frameIndex = i + 1;
+                const filename = `frame-${String(frameIndex).padStart(3, '0')}.jpg`;
+                img.src = `${imageFolderPath}${filename}`;
 
-            loadedImages.push(img);
-        }
+                img.onload = () => {
+                    setLoadedCount(prev => prev + 1);
+                };
 
-        setImages(loadedImages);
+                loadedImages.push(img);
+            }
+            setImages(loadedImages);
+        };
+
+        loadImages();
     }, [totalFrames, imageFolderPath]);
+
+    useEffect(() => {
+        if (loadedCount === totalFrames) {
+            setImagesLoaded(true);
+        }
+    }, [loadedCount, totalFrames]);
 
     // Render logic
     const renderFrame = (index: number) => {
         const canvas = canvasRef.current;
+        // Allow rendering if the image exists and is complete (loaded)
+        // We don't wait for ALL images to load anymore for the first frame
         if (!canvas || !images[index] || !images[index].complete) return;
 
         const ctx = canvas.getContext('2d');
@@ -53,17 +65,24 @@ export default function ZondaScrollCanvas({
 
         // Handle high DPI
         const dpr = window.devicePixelRatio || 1;
-
-        // Set canvas dimensions if not set (or on resize, but basic for now)
-        // We assume the canvas is sized via CSS (w-full h-full)
-        // But we need to set internal width/height to match display size * dpr
         const rect = canvas.getBoundingClientRect();
+
+        // Only resize if necessary to avoid clearing the canvas unnecessarily
+        if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        // Reset scale for every draw if we didn't resize? 
+        // Actually, if we stick to the resize logic above, we need to ensure scale is correct.
+        // It's safer to always set dimensions and scale for this use case if we want responsiveness.
+        // But for performance, let's keep it simple: just overwrite.
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
         ctx.scale(dpr, dpr);
 
         // Draw image contain logic
-        // We want object-fit: contain manually
         const img = images[index];
         const canvasRatio = rect.width / rect.height;
         const imgRatio = img.width / img.height;
@@ -71,13 +90,11 @@ export default function ZondaScrollCanvas({
         let drawWidth, drawHeight, offsetX, offsetY;
 
         if (canvasRatio > imgRatio) {
-            // Canvas is wider than image -> fit by height
             drawHeight = rect.height;
             drawWidth = img.width * (rect.height / img.height);
             offsetX = (rect.width - drawWidth) / 2;
             offsetY = 0;
         } else {
-            // Canvas is taller than image -> fit by width
             drawWidth = rect.width;
             drawHeight = img.height * (rect.width / img.width);
             offsetX = 0;
@@ -85,13 +102,16 @@ export default function ZondaScrollCanvas({
         }
 
         ctx.clearRect(0, 0, rect.width, rect.height);
-        // ctx.fillStyle = '#1a1a1a'; // Optional background clear
-        // ctx.fillRect(0, 0, rect.width, rect.height);
+
+        // High quality smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
         ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     };
 
     useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-        if (!imagesLoaded || images.length === 0) return;
+        if (images.length === 0) return;
 
         // Map 0-1 to 0-(totalFrames-1)
         const frameIndex = Math.min(
@@ -102,12 +122,13 @@ export default function ZondaScrollCanvas({
         requestAnimationFrame(() => renderFrame(frameIndex));
     });
 
-    // Initial render when loaded
+    // Initial render when first image loaded or images set
     useEffect(() => {
-        if (imagesLoaded) {
+        // Try to render the first frame as soon as possible
+        if (images.length > 0 && images[0]?.complete) {
             renderFrame(0);
         }
-    }, [imagesLoaded]);
+    }, [images, loadedCount]);
 
     // Handle Resize
     useEffect(() => {
@@ -117,17 +138,32 @@ export default function ZondaScrollCanvas({
                 totalFrames - 1,
                 Math.floor(currentProgress * totalFrames)
             );
-            if (imagesLoaded) renderFrame(frameIndex);
+            if (images.length > 0) renderFrame(frameIndex);
         };
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [imagesLoaded, scrollYProgress, totalFrames]);
+    }, [images, scrollYProgress, totalFrames]);
+
+    const progress = Math.min(100, (loadedCount / totalFrames) * 100);
 
     return (
-        <canvas
-            ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-0"
-        />
+        <>
+            <canvas
+                ref={canvasRef}
+                className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-0"
+            />
+            {/* Loading Indicator - Subtle 'Classy' Bar */}
+            {!imagesLoaded && (
+                <div className="fixed top-0 left-0 w-full h-1 z-50 pointer-events-none">
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ ease: "linear", duration: 0.2 }}
+                        className="h-full bg-lambo-yellow shadow-[0_0_10px_rgba(219,255,0,0.5)]"
+                    />
+                </div>
+            )}
+        </>
     );
 }

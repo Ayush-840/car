@@ -65,6 +65,10 @@ export default function Home() {
                     </footer>
                 </div>
             </div>
+
+            {/* Cinematic Overlays */}
+            <div className="grain-overlay"></div>
+            <div className="vignette-overlay"></div>
         </main>
     );
 }
