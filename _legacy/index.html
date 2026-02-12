@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamborghini Revuelto 360&deg; Experience</title>
+    <meta name="description" content="Interactive 360-degree view of the Lamborghini Revuelto. Drag to rotate.">
+    <link rel="stylesheet" href="src/style.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Lamborghini Revuelto</h1>
+            <p class="subtitle">Drag to Rotate</p>
+        </header>
+        
+        <div class="sequence-wrapper" id="sequence-wrapper">
+            <div class="loading-overlay" id="loading-overlay">
+                <div class="spinner"></div>
+                <p>Loading Experience <span id="progress-text">0%</span></p>
+            </div>
+            <img id="car-image" src="public/images/revuelto-sequence/frame-001.jpg" alt="Lamborghini Revuelto 360 View" draggable="false">
+        </div>
+
+        <footer>
+            <div class="controls-hint">
+                <span class="icon">↔</span> Drag to explore
+            </div>
+        </footer>
+    </div>
+
+    <script src="src/script.js"></script>
+</body>
+</html>
