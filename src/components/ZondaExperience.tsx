@@ -62,7 +62,7 @@ export default function ZondaExperience({ scrollYProgress }: ZondaExperienceProp
                 <div className="overflow-hidden">
                     <motion.h1
                         variants={fadeInUp}
-                        className="text-7xl md:text-9xl font-black uppercase tracking-tighter text-white mb-4 italic transform -skew-x-12 drop-shadow-2xl"
+                        className="hero-title text-7xl md:text-9xl font-black uppercase tracking-tighter text-white mb-4 italic transform -skew-x-12 drop-shadow-2xl"
                     >
                         {CAR_DATA.hero.title}
                     </motion.h1>
@@ -70,7 +70,7 @@ export default function ZondaExperience({ scrollYProgress }: ZondaExperienceProp
                 <div className="overflow-hidden">
                     <motion.p
                         variants={fadeInUp}
-                        className="text-xl md:text-2xl text-lambo-yellow font-exo2 tracking-widest mb-8 border-l-4 border-lambo-yellow pl-4"
+                        className="hero-price text-xl md:text-2xl text-lambo-yellow font-exo2 tracking-widest mb-8 border-l-4 border-lambo-yellow pl-4"
                     >
                         {CAR_DATA.hero.price}
                     </motion.p>
@@ -82,7 +82,7 @@ export default function ZondaExperience({ scrollYProgress }: ZondaExperienceProp
                 style={{ opacity: designOpacity, y: designY }}
                 className="absolute inset-0 flex items-center justify-start container mx-auto px-6 md:px-12"
             >
-                <div className="max-w-xl frosted-glass p-10 border-l-4 border-lambo-yellow backdrop-blur-md bg-black/30">
+                <div className="design-panel max-w-xl frosted-glass p-10 border-l-4 border-lambo-yellow backdrop-blur-md bg-black/30">
                     <motion.h2
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}

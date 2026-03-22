@@ -89,3 +89,70 @@ h6 {
     z-index: 9998;
     background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
 }
+
+/* Responsive tweaks: smaller devices and tablets */
+@media (max-width: 1024px) {
+    /* Reduce hero sizes a touch on tablets */
+    .hero-title {
+        font-size: 4.5rem !important;
+        line-height: 1 !important;
+    }
+
+    .hero-price {
+        font-size: 1.5rem !important;
+    }
+
+    .design-panel {
+        padding: 2.5rem !important;
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Mobile specific adjustments */
+    nav {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 0.9rem !important;
+        padding-bottom: 0.9rem !important;
+    }
+
+    .container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* Target the hero specifically so other headings remain untouched */
+    .hero-title {
+        font-size: clamp(2rem, 10vw, 3.25rem) !important;
+        white-space: normal !important;
+        transform: none !important;
+    }
+
+    .hero-price {
+        font-size: 1rem !important;
+        padding-left: 0.75rem !important;
+        border-left-width: 3px !important;
+    }
+
+    .design-panel {
+        padding: 1rem !important;
+        border-left-width: 4px !important;
+    }
+
+    /* Make canvas behave more like a cover image on small screens */
+    canvas.zonda-canvas {
+        height: 60vh !important;
+        object-fit: cover !important;
+    }
+
+    .frosted-glass {
+        backdrop-filter: blur(8px) !important;
+    }
+
+    /* Tame some big Tailwind text classes on tiny viewports */
+    .text-4xl { font-size: 1.25rem !important; }
+    .text-6xl { font-size: 1.75rem !important; }
+    .text-7xl { font-size: 2.25rem !important; }
+    .text-9xl { font-size: 3rem !important; }
+}

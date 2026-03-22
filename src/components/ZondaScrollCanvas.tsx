@@ -151,7 +151,7 @@ export default function ZondaScrollCanvas({
         <>
             <canvas
                 ref={canvasRef}
-                className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-0"
+                className="zonda-canvas absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-0"
             />
             {/* Loading Indicator - Subtle 'Classy' Bar */}
             {!imagesLoaded && (
